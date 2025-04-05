@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BookChain - SwapSafe</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+<body>
+  <h1>📚 BookChain – SwapSafe</h1>
+
+  <button onclick="connectWallet()">🔌 Connect Wallet</button>
+  <p id="wallet-address"></p>
+
+  <h2>List a Book</h2>
+  <input id="bookTitle" placeholder="Book Title" />
+  <input id="bookIPFS" placeholder="IPFS Hash" />
+  <button onclick="listBook()">📤 List Book</button>
+
+  <h2>Transfer Ownership</h2>
+  <input id="bookIdTransfer" placeholder="Book ID" />
+  <input id="newOwner" placeholder="New Owner Address" />
+  <button onclick="transferBook()">🔄 Transfer</button>
+
+  <h2>📚 Listed Books</h2>
+  <button onclick="loadBooks()">🔁 Refresh</button>
+  <ul id="bookList"></ul>
+
+  <script>
+    const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138";
+    const contractABI = [YOUR_ABI_HERE]; // We'll fix this below
+
+    let web3;
+    let contract;
+    let currentAccount;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const accounts = await web3.eth.getAccounts();
+        currentAccount = accounts[0];
+        document.getElementById("wallet-address").innerText = "Connected: " + currentAccount;
+
+        contract = new web3.eth.Contract(contractABI, contractAddress);
+      } else {
+        alert("Install MetaMask first!");
+      }
+    }
+
+    async function listBook() {
+      const title = document.getElementById("bookTitle").value;
+      const ipfs = document.getElementById("bookIPFS").value;
+      await contract.methods.listBook(title, ipfs).send({ from: currentAccount });
+      alert("Book listed!");
+    }
+
+    async function transferBook() {
+      const bookId = document.getElementById("bookIdTransfer").value;
+      const newOwner = document.getElementById("newOwner").value;
+      await contract.methods.transferOwnership(bookId, newOwner).send({ from: currentAccount });
+      alert("Ownership transferred!");
+    }
+
+    async function loadBooks() {
+      const count = await contract.methods.bookCount().call();
+      const list = document.getElementById("bookList");
+      list.innerHTML = "";
+      for (let i = 0; i < count; i++) {
+        const book = await contract.methods.books(i).call();
+        const li = document.createElement("li");
+        li.textContent = `📘 ${book.title} | Owner: ${book.owner} | IPFS: ${book.ipfsHash}`;
+        list.appendChild(li);
+      }
+    }
+
+    // Set the ABI (paste yours below)
+    const abi = [YOUR_ABI_HERE];
+    contractABI.splice(0, contractABI.length, ...abi);
+  </script>
+</body>
+</html>
