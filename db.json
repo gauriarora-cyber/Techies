@@ -1,0 +1,69 @@
+{
+  "books": [
+    {
+      "id": "1",
+      "title": "undefined",
+      "author": "Author 1",
+      "price": 10,
+      "status": "available",
+      "available_for_exchange": true,
+      "exchange_with": "Book Title 2"
+    },
+    {
+      "id": "2",
+      "title": "undefined",
+      "author": "Author 2",
+      "price": 15,
+      "status": "available",
+      "available_for_exchange": true,
+      "exchange_with": "Book Title 1"
+    },
+    {
+      "id": "e0fb",
+      "bookName": "hgf",
+      "author": "ytr",
+      "bookCondition": "tre",
+      "price": "32",
+      "seller": "Test User",
+      "isVerified": true
+    },
+    {
+      "id": "852c",
+      "bookName": "sdfg",
+      "author": "zxcv",
+      "bookCondition": "yo",
+      "price": "8",
+      "seller": "Test User",
+      "isVerified": true
+    }
+  ],
+  "reviews": [
+    {
+      "bookId": 1,
+      "rating": 5,
+      "review": "Great book! Highly recommended.",
+      "id": "1ed2"
+    },
+    {
+      "id": "073b",
+      "bookId": 1,
+      "rating": "4",
+      "review": "good"
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "user1",
+      "email": "user1@example.com",
+      "password": "password",
+      "exchange_requests": [
+        {
+          "requested_book": "Book Title 2",
+          "offered_book": "Book Title 1",
+          "status": "pending"
+        }
+      ]
+    }
+  ]
+}
