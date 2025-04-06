@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .remove-from-cart {
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .remove-from-cart:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Your Cart</h1>
+
+    <!-- Cart Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Book Name</th>
+                <th>Author</th>
+                <th>Price</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody id="cart-list">
+            <!-- Cart items will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <!-- Proceed to Checkout Button -->
+    <button onclick="window.location.href='checkout.html'">Proceed to Checkout</button>
+
+
+    <script>
+        // Function to fetch books in the cart
+        function fetchCart() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                document.getElementById('cart-list').innerHTML = '<tr><td colspan="4">Your cart is empty.</td></tr>';
+                return;
+            }
+            cart.forEach(bookId => {
+                fetch(`http://localhost:3000/books/${bookId}`)
+                    .then(response => response.json())
+                    .then(book => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = ` 
+                            <td>${book.bookName}</td>
+                            <td>${book.author}</td>
+                            <td>${book.price}</td>
+                            <td><button class="remove-from-cart" onclick="removeFromCart(${book.id})">Remove</button></td>
+                        `;
+                        document.getElementById('cart-list').appendChild(row);
+                    });
+            });
+        }
+
+        // Function to remove books from cart
+        function removeFromCart(bookId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart = cart.filter(id => id !== bookId);
+            localStorage.setItem('cart', JSON.stringify(cart));  // Save updated cart
+            fetchCart();  // Refresh the cart view
+        }
+
+        // Fetch and display cart items
+        fetchCart();
+    </script>
+
+</body>
+</html>
+
+
+

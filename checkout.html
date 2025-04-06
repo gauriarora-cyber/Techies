@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .checkout-form {
+            width: 50%;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .checkout-form input {
+            padding: 10px;
+            margin: 10px;
+            width: 80%;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .checkout-form button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .checkout-form button:hover {
+            background-color: #45a049;
+        }
+        .cart-summary {
+            margin-top: 30px;
+        }
+        .cart-summary table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        .cart-summary th, .cart-summary td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .cart-summary th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Checkout</h1>
+
+    <div class="checkout-form">
+        <h2>Enter Your Details</h2>
+        <form id="checkout-form">
+            <input type="text" id="name" placeholder="Full Name" required /><br>
+            <input type="text" id="address" placeholder="Shipping Address" required /><br>
+            <input type="email" id="email" placeholder="Email Address" required /><br>
+            <input type="text" id="payment" placeholder="Payment Details (Card, etc.)" required /><br>
+            <button type="submit">Complete Purchase</button>
+        </form>
+    </div>
+
+    <div class="cart-summary">
+        <h2>Order Summary</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Book Name</th>
+                    <th>Author</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody id="cart-summary">
+                <!-- Cart items will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Function to display cart items in the checkout page
+        function displayCartSummary() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                document.getElementById('cart-summary').innerHTML = '<tr><td colspan="3">Your cart is empty.</td></tr>';
+                return;
+            }
+
+            let total = 0;
+            cart.forEach(bookId => {
+                fetch(`http://localhost:3000/books/${bookId}`)
+                    .then(response => response.json())
+                    .then(book => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${book.bookName}</td>
+                            <td>${book.author}</td>
+                            <td>${book.price}</td>
+                        `;
+                        document.getElementById('cart-summary').appendChild(row);
+                        total += parseFloat(book.price);
+                    });
+
+            });
+
+            // Display total price
+            const totalRow = document.createElement('tr');
+            totalRow.innerHTML = `
+                <td colspan="2">Total</td>
+                <td>${total}</td>
+            `;
+            document.getElementById('cart-summary').appendChild(totalRow);
+        }
+
+        // Handle form submission
+        document.getElementById('checkout-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            // Get user input data
+            const name = document.getElementById('name').value;
+            const address = document.getElementById('address').value;
+            const email = document.getElementById('email').value;
+            const payment = document.getElementById('payment').value;
+
+            // Perform any additional validation or processing here (e.g., payment gateway integration)
+
+            alert('Your purchase has been successfully completed!');
+            
+            // Clear cart after successful purchase
+            localStorage.removeItem('cart');
+            
+            // Redirect to confirmation page or home page
+            window.location.href = 'ty.html'; // or back to home page
+        });
+
+        // Display cart items
+        displayCartSummary();
+    </script>
+
+</body>
+</html>
