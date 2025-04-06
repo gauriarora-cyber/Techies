@@ -1,76 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>BookChain - SwapSafe</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <title>BookChain - List & Add Books</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { margin: 5px 0; padding: 8px; width: 300px; }
+    #bookList { margin-top: 20px; }
+    .book-item { padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; border-radius: 5px; }
+  </style>
 </head>
 <body>
-  <h1>📚 Welcome to BookChain - SwapSafe</h1>
 
-  <button onclick="connectWallet()">🔌 Connect Wallet</button>
-  <p id="wallet-address"></p>
+  <h1>📚 BookChain</h1>
 
-  <h2>📤 List a Book</h2>
-  <input id="bookTitle" placeholder="Book Title">
-  <input id="ipfsHash" placeholder="IPFS Hash">
-  <button onclick="listBook()">List Book</button>
+  <p>Logged in as <strong id="usernameDisplay"></strong> 
+    <button onclick="logout()">🚪 Logout</button>
+ </p> 
+
+  <h2>Add a Book</h2>
+  <input type="text" id="bookTitle" placeholder="Book Title" required><br>
+  <input type="text" id="ipfsHash" placeholder="IPFS Hash" required><br>
+  <button onclick="addBook()">➕ Add Book</button>
 
   <h2>📖 Listed Books</h2>
-  <ul id="bookList"></ul>
+  <div id="bookList">Loading...</div>
 
   <script>
-    const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138"; // Your Remix-deployed address
+   let user = localStorage.getItem("bookchainUser");
+  if (!user) {
+    alert("Please login first!");
+    window.location.href = "login.html";
+  }
 
-    const abi = [
-      { "type": "function", "name": "listBook", "inputs": [ { "type": "string" }, { "type": "string" } ], "outputs": [], "stateMutability": "nonpayable" },
-      { "type": "function", "name": "bookCount", "inputs": [], "outputs": [ { "type": "uint256" } ], "stateMutability": "view" },
-      { "type": "function", "name": "books", "inputs": [ { "type": "uint256" } ], "outputs": [ { "type": "string" }, { "type": "string" }, { "type": "address" } ], "stateMutability": "view" }
-    ];
+  const API_URL = "http://localhost:3000/books";
 
-    let signer;
-    let contract;
+  // Load all books on page load
+  window.onload = () => {
+    fetchBooks();
+    document.getElementById("usernameDisplay").innerText = user;
+  };
 
-    async function connectWallet() {
-      if (typeof window.ethereum !== 'undefined') {
-        await ethereum.request({ method: 'eth_requestAccounts' });
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        const address = await signer.getAddress();
-        document.getElementById("wallet-address").innerText = "Connected: " + address;
-        contract = new ethers.Contract(contractAddress, abi, signer);
-        loadBooks();
-      } else {
-        alert("Please install MetaMask!");
-      }
+    function fetchBooks() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          const bookList = document.getElementById("bookList");
+          bookList.innerHTML = ""; // Clear existing
+
+          if (data.length === 0) {
+            bookList.innerHTML = "<i>No books listed yet.</i>";
+            return;
+          }
+
+          data.forEach(book => {
+            const div = document.createElement("div");
+            div.className = "book-item";
+            div.innerHTML = `
+              <strong>${book.title}</strong><br>
+              IPFS Hash: ${book.ipfsHash}<br>
+              Owner: ${book.owner}
+            `;
+            bookList.appendChild(div);
+          });
+        })
+        .catch(err => {
+          console.error("❌ Failed to fetch books:", err);
+          document.getElementById("bookList").innerText = "Error loading books.";
+        });
     }
 
-    async function listBook() {
+    function addBook() {
       const title = document.getElementById("bookTitle").value;
-      const ipfs = document.getElementById("ipfsHash").value;
-      if (!title || !ipfs) return alert("Fill both fields!");
-      try {
-        const tx = await contract.listBook(title, ipfs);
-        await tx.wait();
-        alert("Book listed successfully!");
-        loadBooks();
-      } catch (err) {
-        console.error(err);
-        alert("Error listing book!");
-      }
-    }
+      const ipfsHash = document.getElementById("ipfsHash").value;
 
-    async function loadBooks() {
-      if (!contract) return;
-      const count = await contract.bookCount();
-      const list = document.getElementById("bookList");
-      list.innerHTML = "";
-      for (let i = 0; i < count; i++) {
-        const book = await contract.books(i);
-        const li = document.createElement("li");
-        li.innerText = `${i + 1}. Title: ${book[0]}, Owner: ${book[2]}`;
-        list.appendChild(li);
+      if (!title || !ipfsHash) {
+        alert("Please fill in both fields.");
+        return;
       }
+
+      fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title,
+          ipfsHash,
+          owner: user
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          alert("✅ Book added!");
+          fetchBooks(); // Refresh book list
+          document.getElementById("bookTitle").value = "";
+          document.getElementById("ipfsHash").value = "";
+        })
+        .catch(err => {
+          console.error("❌ Failed to add book:", err);
+          alert("Error adding book.");
+        });
     }
+    function logout() {
+  localStorage.removeItem("bookchainUser");
+  window.location.href = "login.html";
+}
   </script>
+
 </body>
 </html>
