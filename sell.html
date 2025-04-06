@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell Book</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input[type="text"], input[type="number"], input[type="date"] {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            width: 200px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Sell Your Book</h1>
+    <form id="sell-form">
+        <input type="text" id="bookName" placeholder="Book Name" required /><br>
+        <input type="text" id="author" placeholder="Author Name" required /><br>
+        <input type="text" id="bookCondition" placeholder="Condition of the Book (e.g., New, Good, etc.)" required /><br>
+        <input type="number" id="price" placeholder="Price" required /><br>
+        <button type="submit">Add Book</button>
+    </form>
+
+    <script>
+        document.getElementById('sell-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const bookName = document.getElementById('bookName').value;
+            const author = document.getElementById('author').value;
+            const bookCondition = document.getElementById('bookCondition').value;
+            const price = document.getElementById('price').value;
+
+            // Create a new book object to save
+            const newBook = {
+                bookName,
+                author,
+                bookCondition,
+                price,
+                seller: 'Test User', // This can be replaced with the logged-in user's username
+                isVerified: true, // Assuming the book is genuine
+            };
+
+            // Send the book data to the json-server to save it in db.json
+            const response = await fetch('http://localhost:3000/books', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newBook),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // If the book is added successfully, redirect to the confirmation page
+                window.location.href = 'booklist.html';  // Redirect to a page where the seller can see the book listings
+            } else {
+                // Show error message if something goes wrong
+                alert('Failed to add the book. Please try again.');
+            }
+        });
+    </script>
+
+</body>
+</html>

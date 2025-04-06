@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Books</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .book {
+            border: 1px solid #ddd;
+            margin: 20px;
+            padding: 20px;
+            display: inline-block;
+            width: 200px;
+            text-align: center;
+        }
+        .book img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .book h3, .book p {
+            margin: 10px 0;
+        }
+        .add-to-cart {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .add-to-cart:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Browse Books</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Book Name</th>
+                <th>Author</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="book-list">
+            <!-- Book listings will be added here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Fetch books from json-server
+        fetch('http://localhost:3000/books')
+            .then(response => response.json())
+            .then(books => {
+                const bookList = document.getElementById('book-list');
+                books.forEach(book => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${book.bookName}</td>
+                        <td>${book.author}</td>
+                        <td>${book.price}</td>
+                        <td><button class="add-to-cart" onclick="addToCart(${book.id})">Add to Cart</button></td>
+                    `;
+                    bookList.appendChild(row);
+                });
+            });
+
+        // Function to add book to cart
+        function addToCart(bookId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            // Check if the book is already in the cart
+            if (cart.includes(bookId)) {
+                alert("This book is already in your cart!");
+            } else {
+                // If the book is not in the cart, add it
+                cart.push(bookId);
+                localStorage.setItem('cart', JSON.stringify(cart));  // Save updated cart to localStorage
+                alert("Book added to your cart!");
+            }
+        }
+    </script>
+
+</body>
+</html>
+

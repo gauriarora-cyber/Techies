@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .review-form {
+            margin-top: 20px;
+        }
+        .rating {
+            margin: 10px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .avg-rating {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Book Details</h1>
+    <div id="book-info">
+        <!-- Book info will be displayed here -->
+    </div>
+
+    <h2>Average Rating: <span id="average-rating" class="avg-rating">Loading...</span></h2>
+    <h2>Leave a Review</h2>
+    <div class="review-form">
+        <label for="rating">Rating (1-5): </label>
+        <input type="number" id="rating" min="1" max="5" required><br><br>
+        <label for="review">Review: </label><br>
+        <textarea id="review" rows="4" cols="50" required></textarea><br><br>
+        <button class="button" id="submit-review">Submit Review</button>
+    </div>
+
+    <h2>Reviews</h2>
+    <div id="reviews">
+        <!-- Reviews will be displayed here -->
+    </div>
+
+    <script>
+        // Fetch book details and reviews from JSON Server
+        const bookId = 1; // Example book ID (should be dynamic)
+        
+        fetch(`http://localhost:3000/books/${bookId}`)
+            .then(response => response.json())
+            .then(book => {
+                document.getElementById('book-info').innerHTML = `
+                    <p><strong>Book Name:</strong> ${book.bookName}</p>
+                    <p><strong>Author:</strong> ${book.author}</p>
+                    <p><strong>Price:</strong> ${book.price}</p>
+                    <p><strong>Condition:</strong> ${book.bookCondition}</p>
+                `;
+            });
+
+        // Fetch and display reviews
+        fetch(`http://localhost:3000/reviews?bookId=${bookId}`)
+            .then(response => response.json())
+            .then(reviews => {
+                const reviewsContainer = document.getElementById('reviews');
+                let totalRating = 0;
+                reviews.forEach(review => {
+                    const reviewDiv = document.createElement('div');
+                    reviewDiv.innerHTML = `
+                        <p><strong>Rating:</strong> ${review.rating}</p>
+                        <p><strong>Review:</strong> ${review.review}</p>
+                    `;
+                    reviewsContainer.appendChild(reviewDiv);
+                    totalRating += parseInt(review.rating);
+                });
+
+                // Calculate and display the average rating
+                const avgRating = totalRating / reviews.length;
+                document.getElementById('average-rating').innerText = avgRating.toFixed(1);
+            });
+
+        // Handle review submission
+        document.getElementById('submit-review').addEventListener('click', () => {
+            const rating = document.getElementById('rating').value;
+            const reviewText = document.getElementById('review').value;
+
+            if (rating && reviewText) {
+                const newReview = {
+                    bookId: bookId,
+                    rating: rating,
+                    review: reviewText
+                };
+
+                // POST new review to JSON Server
+                fetch('http://localhost:3000/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newReview)
+                })
+                .then(response => response.json())
+                .then(() => {
+                    alert('Review submitted successfully!');
+                    window.location.reload(); // Reload to show the new review and update average rating
+                });
+            } else {
+                alert('Please fill in all fields.');
+            }
+        });
+    </script>
+
+</body>
+</html>

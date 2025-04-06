@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Books</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Your Listed Books</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Book Name</th>
+                <th>Author</th>
+                <th>Condition</th>
+                <th>Price</th>
+                <th>Available for Exchange</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="book-list">
+            <!-- Book listings will be added here -->
+        </tbody>
+    </table>
+
+    <div id="exchange-details" style="margin-top: 20px; display:none;">
+        <h3>Exchange Request Details</h3>
+        <p id="request-details"></p>
+    </div>
+
+    <script>
+        // Fetch the books data from json-server and display it
+        fetch('http://localhost:3000/books')
+            .then(response => response.json())
+            .then(books => {
+                const bookList = document.getElementById('book-list');
+                books.forEach(book => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${book.bookName}</td>
+                        <td>${book.author}</td>
+                        <td>${book.bookCondition}</td>
+                        <td>${book.price}</td>
+                        <td>
+                            <input type="checkbox" class="exchange-toggle" 
+                                ${book.available_for_exchange ? 'checked' : ''} 
+                                onclick="toggleExchangeAvailability(${book.id}, this.checked)">
+                        </td>
+                        <td>
+                            <button class="button" onclick="requestExchange(${book.id})">Request Exchange</button>
+                        </td>
+                    `;
+                    bookList.appendChild(row);
+                });
+            });
+
+        // Toggle exchange availability (yes/no) when checkbox is clicked
+        function toggleExchangeAvailability(bookId, isChecked) {
+            fetch(`http://localhost:3000/books/${bookId}`)
+                .then(response => response.json())
+                .then(book => {
+                    if (book) {
+                        book.available_for_exchange = isChecked;
+                        fetch(`http://localhost:3000/books/${bookId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(book),
+                        })
+                        .then(response => response.json())
+                        .then(updatedBook => {
+                            alert(`Book '${updatedBook.bookName}' exchange availability updated.`);
+                        })
+                        .catch(error => {
+                            console.error('Error updating book availability:', error);
+                        });
+                    }
+                });
+        }
+
+        // Handle the exchange request when button is clicked
+        function requestExchange(bookId) {
+            fetch(`http://localhost:3000/books/${bookId}`)
+                .then(response => response.json())
+                .then(book => {
+                    if (book) {
+                        // Show exchange details
+                        const exchangeDetails = document.getElementById('exchange-details');
+                        const requestDetails = document.getElementById('request-details');
+                        exchangeDetails.style.display = 'block';
+                        
+                        // Request details: Which book they want to exchange and what book they want in exchange
+                        requestDetails.innerHTML = `
+                            You have requested to exchange your book:
+                            <br><strong>${book.bookName}</strong> by ${book.author}.
+                            <br>Please choose the book you want in exchange.
+                        `;
+                    }
+                });
+        }
+    </script>
+
+</body>
+</html>
