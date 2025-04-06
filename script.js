@@ -52,3 +52,18 @@ function loginUser(event) {
       alert("Error connecting to server.");
     });
 }
+  async function connectWallet() {
+  if (window.ethereum) {
+      try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const account = accounts[0];
+          console.log("Connected wallet:", account);
+          alert("Wallet connected: " + account);
+      } catch (error) {
+          console.error("User rejected wallet connection", error);
+      }
+    } else {
+      alert("Please install MetaMask!");
+  }
+}
+
