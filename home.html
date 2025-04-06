@@ -1,13 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Home - SwapSafe</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-  <h1>Welcome to BookChain 📚🔐</h1>
-  <p>You are now logged in.</p>
 
-  <a href="login.html">Logout</a>
+    <h1>Welcome to BookChain</h1>
+    <p>Choose an option to get started:</p>
+
+    <!-- Login Button -->
+    <button class="button" onclick="window.location.href='login.html'">Login</button>
+
+    <!-- Register Button -->
+    <button class="button" onclick="window.location.href='register.html'">Register</button>
 </body>
 </html>
